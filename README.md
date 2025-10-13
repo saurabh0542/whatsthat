@@ -33,7 +33,7 @@ A brutally honest WhatsApp Web analyzer, because group chats have politics too. 
 - I am looking for folks to contribute to this project 🙂
 
 ## Disclaimer
-I am not not responsible for ruined friendships, exposed cliques, or awkward brunches.
+I am not responsible for ruined friendships, exposed cliques, or awkward brunches.
 Use responsibly. Or don’t - honestly, we’re all curious who the group’s real favorite is. But seriously...This is a mirror, not a gavel. Use insights to improve conversations - not weaponize them 😘
 
 ## License
