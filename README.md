@@ -2,14 +2,13 @@
   <img src="logo.png" alt="What's That!?" width="200" />
 </p>
 
-# What's That!? v0.7
+# What's That!? v0.7 (chrome-extension)
 
 A brutally honest WhatsApp Web analyzer, because group chats have politics too. It quietly watches reactions and replies, then surfaces the social gravity you feel but can’t quite prove: favoritism, marginalization, and influence.
 
 ## Why
 - Uncover who gets boosted, who gets ignored, and who orbits whom.
 - Spot toxic loops early. Celebrate healthy dynamics loudly.
-- Who reacts to whom - and who’s getting ghosted.
 - Which members form secret reaction cartels.
 - Who’s the real influencer vs. who just thinks they are.
 - And yes, who loves you significantly less than you thought...
@@ -31,7 +30,7 @@ A brutally honest WhatsApp Web analyzer, because group chats have politics too. 
 - WhatsApp Web loads history in chunks; It persist what you’ve seen and can backfill.
 - Export/Import available for audits or offline analysis.
 - This is a work in progress ⚠️
-- I am looking for contributors to this project 🙂
+- I am looking for folks to contribute to this project 🙂
 
 ## Disclaimer
 I am not not responsible for ruined friendships, exposed cliques, or awkward brunches.
