@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="What's That!?" width="120" />
+  <img src="logo.png" alt="What's That!?" width="200" />
 </p>
 
 # What's That!? v0.7
