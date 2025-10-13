@@ -38,3 +38,5 @@ Use responsibly. Or don’t - honestly, we’re all curious who the group’s re
 
 
 
+## License
+MIT © 2024 Mark Rai
