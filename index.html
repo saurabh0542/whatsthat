@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>What's That!?</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    html,body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto}
+    .dropzone{border:2px dashed rgba(0,0,0,.15)}
+    header,main{position:relative;z-index:1}
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <img src="logo.png" alt="What's That!?" class="h-7 w-7" />
+        <h1 class="text-2xl font-extrabold tracking-tight">What's That!?</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="inline-flex items-center px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 cursor-pointer text-sm font-semibold">
+          <input id="fileInput" type="file" accept=".txt" class="hidden">
+          <span>Select .txt</span>
+        </label>
+        <button id="demoBtn" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm font-semibold">Try Demo</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6">
+    <section id="dropArea" class="dropzone rounded-2xl bg-white p-10 text-center text-slate-600">
+      <div class="mx-auto max-w-xl">
+        <div class="text-xl font-semibold">Drop your exported WhatsApp chat .txt here</div>
+        <div class="mt-2 text-sm">Or use the Select button above. Exports with or without media are fine.</div>
+      </div>
+    </section>
+
+    <section id="summary" class="mt-8 hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200">
+          <div class="text-sm text-slate-500">Total messages</div>
+          <div id="totalMessages" class="mt-1 text-2xl font-bold">–</div>
+        </div>
+        <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200">
+          <div class="text-sm text-slate-500">Participants</div>
+          <div id="participants" class="mt-1 text-2xl font-bold">–</div>
+        </div>
+        <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200">
+          <div class="text-sm text-slate-500">Date range</div>
+          <div id="dateRange" class="mt-1 text-sm font-semibold">–</div>
+        </div>
+        <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200">
+          <div class="text-sm text-slate-500">Media & Links</div>
+          <div class="mt-1 text-sm"><span id="mediaCount" class="font-semibold">0</span> media • <span id="linkCount" class="font-semibold">0</span> links</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="charts" class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 hidden">
+      <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200"><h3 class="mb-3 font-semibold">Messages by participant</h3><canvas id="byAuthor"></canvas></div>
+      <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200"><h3 class="mb-3 font-semibold">Messages per day</h3><canvas id="perDay"></canvas></div>
+      <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200"><h3 class="mb-3 font-semibold">Hourly distribution</h3><canvas id="byHour"></canvas></div>
+      <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200"><h3 class="mb-3 font-semibold">Weekday distribution</h3><canvas id="byWeekday"></canvas></div>
+      <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200"><h3 class="mb-3 font-semibold">Top words</h3><canvas id="topWords"></canvas></div>
+      <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200"><h3 class="mb-3 font-semibold">Top emojis</h3><canvas id="topEmojis"></canvas></div>
+    </section>
+
+    <section id="tables" class="mt-8 hidden">
+      <div class="p-5 bg-white rounded-2xl shadow-sm border border-slate-200">
+        <h3 class="mb-3 font-semibold">Participants</h3>
+        <div class="overflow-x-auto">
+          <table id="participantsTable" class="min-w-full text-sm">
+            <thead class="text-left text-slate-500">
+              <tr>
+                <th class="py-2 pr-4">Name</th>
+                <th class="py-2 pr-4">Messages</th>
+                <th class="py-2 pr-4">Avg length</th>
+                <th class="py-2 pr-4">Links</th>
+                <th class="py-2 pr-4">Media</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const fileInput = document.getElementById('fileInput')
+    const dropArea = document.getElementById('dropArea')
+    const demoBtn = document.getElementById('demoBtn')
+    const stopwords = new Set("a,about,above,after,again,against,all,am,an,and,any,are,as,at,be,because,been,before,being,below,between,both,but,by,could,did,do,does,doing,down,during,each,few,for,from,further,had,has,have,having,he,her,here,hers,herself,him,himself,his,how,i,if,in,into,is,it,its,itself,let,me,more,most,my,myself,no,nor,not,of,off,on,once,only,or,other,our,ours,ourselves,out,over,own,same,she,should,so,some,such,than,that,the,their,theirs,them,themselves,then,there,these,they,this,those,through,to,too,under,until,up,very,was,we,were,what,when,where,which,while,who,whom,why,with,you,your,yours,yourself,yourselves,rt,ok,yeah,yes,nope,nah".split(','))
+
+    function readFile(f){
+      const r = new FileReader()
+      r.onload = () => analyze(String(r.result))
+      r.readAsText(f)
+    }
+
+    fileInput.addEventListener('change', e => { if(e.target.files[0]) readFile(e.target.files[0]) })
+
+    ;['dragenter','dragover'].forEach(ev=>dropArea.addEventListener(ev,e=>{e.preventDefault();dropArea.classList.add('ring-2','ring-blue-500','bg-blue-50')}))
+    ;['dragleave','drop'].forEach(ev=>dropArea.addEventListener(ev,e=>{e.preventDefault();dropArea.classList.remove('ring-2','ring-blue-500','bg-blue-50')}))
+    dropArea.addEventListener('drop', e=>{const f=e.dataTransfer.files?.[0];if(f&&/\.txt$/i.test(f.name)) readFile(f)})
+
+    demoBtn.addEventListener('click', ()=>{
+      const sample = `12/30/2023, 7:45 PM - Alice: Anyone up for pizza?\n12/30/2023, 7:46 PM - Bob: Yes! 🍕\n12/30/2023, 7:47 PM - Charlie: Link: https://menu.example.com\n12/31/2023, 08:10 - Alice: Happy New Year! 🎉\n[01/01/2024, 09:15] Bob: Good morning\n01/02/2024, 21:34 - Alice: <Media omitted>\n01/02/2024, 21:36 - Bob: Photo\n01/03/2024, 10:02 - Charlie: Meeting at 14:00?\n01/03/2024, 14:05 - Alice: Yes\n01/04/2024, 18:00 - Bob: 👍👍\n01/05/2024, 23:55 - Charlie: Late night message\n01/06/2024, 00:05 - Alice: After midnight\n`;
+      analyze(sample)
+    })
+
+    function isNewMsg(line){
+      const dash = '[\u2013\u2014\-]'
+      const r1 = new RegExp('^(\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}),\\s(\\d{1,2}:\\d{2})(?:\\s?(AM|PM|am|pm))?\\s'+dash+'\\s(.+)$')
+      const r2 = new RegExp('^\\[(\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}),\\s(\\d{1,2}:\\d{2})\\]\\s(.+)$')
+      return r1.test(line) || r2.test(line)
+    }
+
+    function parseHeader(line){
+      const dash = '[\u2013\u2014\-]'
+      const r1 = new RegExp('^(\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}),\\s(\\d{1,2}:\\d{2})(?:\\s?(AM|PM|am|pm))?\\s'+dash+'\\s(.+)$')
+      const r2 = new RegExp('^\\[(\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}),\\s(\\d{1,2}:\\d{2})\\]\\s(.+)$')
+      let m = line.match(r1)
+      if(m) return {date:m[1], time:m[2], ampm:m[3]||'', rest:m[4]}
+      m = line.match(r2)
+      if(m) return {date:m[1], time:m[2], ampm:'', rest:m[3]}
+      return null
+    }
+
+    function detectDMY(samples){
+      let dmyVotes = 0, mdyVotes = 0
+      for(const s of samples){
+        const h = parseHeader(s)
+        if(!h) continue
+        const [a,b] = h.date.split('/').map(Number)
+        if(a>12) dmyVotes++
+        else if(b>12) mdyVotes++
+      }
+      return dmyVotes>mdyVotes
+    }
+
+    function parseDate(dateStr,timeStr,ampm,isDMY){
+      const [p1,p2,p3] = dateStr.split('/').map(Number)
+      const day = isDMY ? p1 : p2
+      const month = isDMY ? p2-1 : p1-1
+      const year = p3<100 ? (p3+2000) : p3
+      let [hh,mm] = timeStr.split(':').map(Number)
+      const am = ampm.toLowerCase()==='am'
+      const pm = ampm.toLowerCase()==='pm'
+      if(pm && hh<12) hh += 12
+      if(am && hh===12) hh = 0
+      return new Date(year,month,day,hh,mm)
+    }
+
+    function parseChat(txt){
+      const lines = txt.replace(/\r\n?/g,'\n').split('\n').filter(Boolean)
+      const sample = []
+      for(let i=0;i<Math.min(lines.length,200);i++){ if(isNewMsg(lines[i])) sample.push(lines[i]) }
+      const isDMY = detectDMY(sample)
+      const msgs = []
+      let cur = null
+      for(const line of lines){
+        if(isNewMsg(line)){
+          if(cur) msgs.push(cur)
+          const h = parseHeader(line)
+          if(!h) continue
+          let name = '', text = ''
+          const colonIdx = h.rest.indexOf(':')
+          if(colonIdx>-1){ name = h.rest.slice(0,colonIdx).trim(); text = h.rest.slice(colonIdx+1).trim() }
+          else { name = 'System'; text = h.rest.trim() }
+          const ts = parseDate(h.date,h.time,h.ampm,isDMY)
+          cur = {date:h.date,time:h.time,ampm:h.ampm,name,text,ts}
+        } else if(cur) {
+          cur.text += '\n' + line.trim()
+        }
+      }
+      if(cur) msgs.push(cur)
+      return msgs.filter(m=>m.name && m.name.toLowerCase()!=='system')
+    }
+
+    function analyze(txt){
+      const msgs = parseChat(txt)
+      if(!msgs.length){ alert('Could not parse messages. Make sure this is a raw WhatsApp .txt export.'); return }
+      document.getElementById('summary').classList.remove('hidden')
+      document.getElementById('charts').classList.remove('hidden')
+      document.getElementById('tables').classList.remove('hidden')
+
+      const byAuthor = new Map()
+      const byDay = new Map()
+      const byHour = new Array(24).fill(0)
+      const byWeekday = new Array(7).fill(0)
+      const wordFreq = new Map()
+      const emojiFreq = new Map()
+      const mediaByAuthor = new Map()
+      const linkByAuthor = new Map()
+      let mediaCount = 0, linkCount = 0
+
+      for(const m of msgs){
+        const d = new Date(m.ts.getFullYear(),m.ts.getMonth(),m.ts.getDate())
+        const dayKey = d.toISOString().slice(0,10)
+        byDay.set(dayKey,(byDay.get(dayKey)||0)+1)
+        byHour[m.ts.getHours()]++
+        byWeekday[m.ts.getDay()]++
+        byAuthor.set(m.name,(byAuthor.get(m.name)||0)+1)
+        const media = /<Media omitted>|image omitted|video omitted|sticker omitted|GIF omitted/i.test(m.text)
+        const links = (m.text.match(/https?:\/\//gi)||[]).length
+        if(media){ mediaCount++; mediaByAuthor.set(m.name,(mediaByAuthor.get(m.name)||0)+1) }
+        if(links){ linkCount+=links; linkByAuthor.set(m.name,(linkByAuthor.get(m.name)||0)+links) }
+        const words = m.text.toLowerCase().replace(/https?:[^\s]+/g,'').replace(/[^\p{L}\p{N}\s']/gu,' ').split(/\s+/).filter(w=>w && !stopwords.has(w) && !/^'+$/.test(w))
+        for(const w of words) wordFreq.set(w,(wordFreq.get(w)||0)+1)
+        const emojis = m.text.match(/\p{Extended_Pictographic}/gu)||[]
+        for(const e of emojis) emojiFreq.set(e,(emojiFreq.get(e)||0)+1)
+      }
+
+      const authors = [...byAuthor.keys()].sort((a,b)=>byAuthor.get(b)-byAuthor.get(a))
+      const first = msgs[0].ts, last = msgs[msgs.length-1].ts
+      document.getElementById('totalMessages').textContent = msgs.length.toLocaleString()
+      document.getElementById('participants').textContent = authors.length.toString()
+      document.getElementById('dateRange').textContent = `${first.toLocaleDateString()} → ${last.toLocaleDateString()}`
+      document.getElementById('mediaCount').textContent = mediaCount.toLocaleString()
+      document.getElementById('linkCount').textContent = linkCount.toLocaleString()
+
+      const tbody = document.querySelector('#participantsTable tbody')
+      tbody.innerHTML = ''
+      for(const a of authors){
+        const rowsMsgs = msgs.filter(m=>m.name===a)
+        const avgLen = Math.round(rowsMsgs.reduce((s,m)=>s+m.text.length,0)/rowsMsgs.length)
+        const tr = document.createElement('tr')
+        tr.innerHTML = `<td class="py-2 pr-4 font-medium">${escapeHtml(a)}</td><td class="py-2 pr-4">${byAuthor.get(a).toLocaleString()}</td><td class="py-2 pr-4">${avgLen}</td><td class="py-2 pr-4">${(linkByAuthor.get(a)||0).toLocaleString()}</td><td class="py-2 pr-4">${(mediaByAuthor.get(a)||0).toLocaleString()}</td>`
+        tbody.appendChild(tr)
+      }
+
+      drawBar('byAuthor', authors, authors.map(a=>byAuthor.get(a)), 'Messages')
+
+      const dayLabels = [...byDay.keys()].sort()
+      const dayValues = dayLabels.map(k=>byDay.get(k))
+      drawLine('perDay', dayLabels, dayValues, 'Messages per day')
+
+      drawBar('byHour', Array.from({length:24},(_,i)=>i), byHour, 'Messages')
+      const wk = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+      drawBar('byWeekday', wk, byWeekday, 'Messages')
+
+      const topWords = [...wordFreq.entries()].sort((a,b)=>b[1]-a[1]).slice(0,15)
+      drawHorizontalBar('topWords', topWords.map(x=>x[0]), topWords.map(x=>x[1]), 'Frequency')
+
+      const topEmojis = [...emojiFreq.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10)
+      drawHorizontalBar('topEmojis', topEmojis.map(x=>x[0]), topEmojis.map(x=>x[1]), 'Frequency')
+
+      window.scrollTo({top: document.getElementById('summary').offsetTop - 12, behavior: 'smooth'})
+    }
+
+    function escapeHtml(s){
+      return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    }
+
+    const chartRefs = {}
+    function destroyChart(id){ if(chartRefs[id]){ chartRefs[id].destroy(); delete chartRefs[id] } }
+
+    function drawBar(id, labels, data, label){
+      destroyChart(id)
+      const ctx = document.getElementById(id).getContext('2d')
+      chartRefs[id] = new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}})
+    }
+
+    function drawHorizontalBar(id, labels, data, label){
+      destroyChart(id)
+      const ctx = document.getElementById(id).getContext('2d')
+      chartRefs[id] = new Chart(ctx,{type:'bar',data:{labels,datasets:[{label,data}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}})
+    }
+
+    function drawLine(id, labels, data, label){
+      destroyChart(id)
+      const ctx = document.getElementById(id).getContext('2d')
+      chartRefs[id] = new Chart(ctx,{
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: label,
+            data: data,
+            fill: false,
+            tension: 0.25
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: true,
+                maxRotation: 0,
+                minRotation: 0
+              }
+            }
+          }
+        }
+      })
+    }
+  </script>
+</body>
+</html>

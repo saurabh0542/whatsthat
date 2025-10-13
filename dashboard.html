@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What's That!? — Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <img src="logo.png" alt="What's That!?" style="height:24px;width:24px;" />
+        <h1>What's That!?</h1>
+      </div>
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="controls">
+      <div class="chat-selector">
+        <label for="chatSelect">Chat/Group</label>
+        <select id="chatSelect">
+        </select>
+        <button id="refreshChatsBtn" class="btn secondary">Refresh Chats</button>
+        <button id="backfillBtn" class="btn secondary">Load Older Messages</button>
+      </div>
+      <div class="actions">
+        <button id="refreshBtn" class="btn">Refresh Data</button>
+        <button id="exportBtn" class="btn secondary">Export Data</button>
+        <button id="clearBtn" class="btn danger">Clear Data</button>
+        <button id="exportCorpusBtn" class="btn secondary">Export Corpus</button>
+        <button id="importCorpusBtn" class="btn secondary">Import Corpus</button>
+        <input type="file" id="importCorpusFile" accept="application/json" style="display:none" />
+      </div>
+    </section>
+
+    <!-- Data Quality Indicator -->
+    <section class="data-quality" id="dataQualitySection">
+      <div class="quality-card">
+        <div class="quality-header">
+          <h3>Data Quality</h3>
+          <div class="quality-score" id="qualityScore">0%</div>
+        </div>
+        <div class="quality-metrics">
+          <div class="metric">
+            <span class="metric-label">Extraction Rate</span>
+            <span class="metric-value" id="extractionRate">0%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Confidence</span>
+            <span class="metric-value" id="confidenceLevel">0%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Sample Size</span>
+            <span class="metric-value" id="sampleSize">0</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Enhanced Analytics Tabs -->
+    <section class="tabs-section">
+      <div class="tabs">
+        <button class="tab-button active" data-tab="overview">Overview</button>
+        <button class="tab-button" data-tab="relationships">Relationships</button>
+        <button class="tab-button" data-tab="temporal">Activity Patterns</button>
+        <button class="tab-button" data-tab="engagement">Engagement</button>
+        <button class="tab-button" data-tab="content">Content Analysis</button>
+      </div>
+
+      <!-- Overview Tab -->
+      <div class="tab-panel active" id="overview">
+        <div class="overview-grid">
+          <div class="overview-card">
+            <h4>Key Metrics</h4>
+            <div class="metric-grid">
+              <div class="metric-item">
+                <div class="metric-number" id="totalMessagesOverview">0</div>
+                <div class="metric-label">Messages</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-number" id="totalReactionsOverview">0</div>
+                <div class="metric-label">Reactions</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-number" id="activeParticipantsOverview">0</div>
+                <div class="metric-label">Active Users</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-number" id="networkDensityOverview">0%</div>
+                <div class="metric-label">Network Density</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="overview-card">
+            <h4>Top Influencers</h4>
+            <div class="influencers-list" id="topInfluencers"></div>
+          </div>
+          
+          <div class="overview-card">
+            <h4>Peak Activity</h4>
+            <div class="peak-activity" id="peakActivity"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Relationships Tab -->
+      <div class="tab-panel" id="relationships">
+        <h3>Relationship Analysis</h3>
+        <p class="hint">Who interacts with whom most frequently</p>
+        <div class="rel-controls">
+          <label class="rel-control">
+            <input type="checkbox" id="includeUnknown"> Include 'Unknown'
+          </label>
+          <label class="rel-control">
+            <input type="checkbox" id="showAllRelationships"> Show all
+          </label>
+          <span class="rel-summary" id="relationshipsSummary"></span>
+        </div>
+        <div class="results-container" id="relationshipsList"></div>
+      </div>
+
+      <!-- Temporal Analysis Tab -->
+      <div class="tab-panel" id="temporal">
+        <h3>Activity Patterns</h3>
+        <div class="temporal-grid">
+          <div class="temporal-card">
+            <h4>Hourly Activity</h4>
+            <div class="chart-container" id="hourlyChart"></div>
+          </div>
+          <div class="temporal-card">
+            <h4>Weekly Patterns</h4>
+            <div class="chart-container" id="weeklyChart"></div>
+          </div>
+          <div class="temporal-card">
+            <h4>Activity Trends</h4>
+            <div class="chart-container" id="trendsChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Engagement Tab -->
+      <div class="tab-panel" id="engagement">
+        <h3>Engagement Analysis</h3>
+        <div class="engagement-grid">
+          <div class="engagement-card">
+            <h4>Active Participants</h4>
+            <div class="participants-list" id="activeParticipants"></div>
+          </div>
+          <div class="engagement-card">
+            <h4>Lurkers</h4>
+            <div class="participants-list" id="lurkers"></div>
+          </div>
+          <div class="engagement-card">
+            <h4>Influence Scores</h4>
+            <div class="influence-list" id="influenceScores"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Analysis Tab -->
+      <div class="tab-panel" id="content">
+        <h3>Content Analysis</h3>
+        <div class="content-grid">
+          <div class="content-card">
+            <h4>Reaction Types</h4>
+            <div class="reaction-types" id="reactionTypes"></div>
+          </div>
+          <div class="content-card">
+            <h4>Top Emojis</h4>
+            <div class="emoji-usage" id="emojiUsage"></div>
+          </div>
+          <div class="content-card">
+            <h4>Message Lengths</h4>
+            <div class="message-lengths" id="messageLengths"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Tip: Open WhatsApp Web and scroll the chat to capture more messages and reactions.</span>
+  </footer>
+
+  <script src="dashboard.js"></script>
+  </body>
+  </html>

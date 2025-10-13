@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What's That!?</title>
+  <link rel="stylesheet" href="popup.css">
+  <style>
+    /* Full-screen mode */
+    html, body {
+      width: 800px;
+      min-height: 600px;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <img src="logo.png" alt="What's That!?" style="height:20px;width:20px;" />
+        <h1>What's That!?</h1>
+      </div>
+      <div class="status-indicator" id="statusIndicator">
+        <span class="status-dot"></span>
+        <span class="status-text">Analyzing...</span>
+      </div>
+    </header>
+
+    <div class="stats-overview" id="statsOverview">
+      <div class="stat-card">
+        <div class="stat-number" id="totalMessages">0</div>
+        <div class="stat-label">Messages Tracked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="totalReactions">0</div>
+        <div class="stat-label">Total Reactions</div>
+      </div>
+    </div>
+
+    <div class="chat-selector">
+      <label for="chatSelect" class="chat-selector-label">Select Chat/Group:</label>
+      <select id="chatSelect" class="chat-select">
+        <option value="">Loading chats...</option>
+      </select>
+      <button id="refreshChatsBtn" class="refresh-btn">Refresh</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-button active" data-tab="relationships">Relationships</button>
+      <button class="tab-button" data-tab="by-sender">By Sender</button>
+      <button class="tab-button" data-tab="by-reactor">By Reactor</button>
+      <button class="tab-button" data-tab="top-reactions">Top Reactions</button>
+    </div>
+
+    <div class="tab-content">
+      <div class="tab-panel active" id="relationships">
+        <h3>Relationship Strength Analysis</h3>
+        <div class="relationships-content"></div>
+      </div>
+
+      <div class="tab-panel" id="by-sender">
+        <h3>Who reacts to whom the most</h3>
+        <div class="results-container" id="bySenderResults">
+          <div class="loading">Loading data...</div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="by-reactor">
+        <h3>Reaction patterns by reactor</h3>
+        <div class="results-container" id="byReactorResults">
+          <div class="loading">Loading data...</div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="top-reactions">
+        <h3>Top reactors for each sender</h3>
+        <div class="results-container" id="topReactionsResults">
+          <div class="loading">Loading data...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="action-button secondary" id="refreshBtn">Refresh Data</button>
+      <button class="action-button danger" id="clearBtn">Clear Data</button>
+    </div>
+
+    <div class="instructions">
+      <h4>How to use:</h4>
+      <ol>
+        <li>Open WhatsApp Web</li>
+        <li>Navigate to any chat</li>
+        <li>This extension will automatically track reactions</li>
+        <li>View statistics in this popup</li>
+      </ol>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
