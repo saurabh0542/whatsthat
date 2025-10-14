@@ -21,9 +21,9 @@ A brutally honest WhatsApp Web analyzer, because group chats have politics too. 
 - Temporal patterns: when the room actually listens.
 
 ## How to use 
+0. Git Clone or Unzip the downloaded repository to a folder.
 1. Load the extension (chrome://extensions → Load unpacked).
 2. Open WhatsApp Web and scroll through chats you care about.
-3. Open the dashboard. Read the room.
 
 ## Notes
 - Data lives locally. Nothing leaves your machine.
